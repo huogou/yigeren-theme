@@ -265,4 +265,5 @@ python sync_theme.py --upload
 | 入库文件数 | 11（含 `.gitignore`、`README.md`），共 2259 行 |
 | 源码来源 | 阿里云轻量应用服务器 `8.137.48.145`，SFTP 拉取 |
 | 首版提交 | `d5a1a90` |
-| 远端仓库 | GitHub 私有仓库（见 `git remote -v`） |
+| 远端仓库 | `https://github.com/huogou/yigeren-theme`（已推送，当前为 **public**，待改为 Private） |
+| 推送方式 | HTTPS + PAT（PAT 仅临时用于 `git push`，未写入任何配置，用完即弃） |
