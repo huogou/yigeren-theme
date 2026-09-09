@@ -1,0 +1,36 @@
+# 忽略 WordPress 主题目录中的备份/临时文件
+# 说明：这些文件在服务器上客观存在，本地同步后仍保留在磁盘上，
+#       仅不纳入 Git 版本管理，以免污染提交历史。
+
+# 备份文件
+*.bak
+*.bak2
+*.bak3
+*.backup
+*.old
+*~
+
+# 备份目录
+_backup_*/
+
+# 系统/编辑器产物
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# 编辑器与工具配置
+.vscode/
+.idea/
+*.sublime-project
+*.sublime-workspace
+
+# 依赖与日志
+node_modules/
+*.log
+
+# 本地环境变量或凭据（禁止入库）
+.env
+.env.*
+*.pem
+*.key
+_credentials.*
