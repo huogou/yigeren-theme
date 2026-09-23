@@ -175,7 +175,9 @@ elseif ( $cat_slug === 'projects' ) :
     <div class="proj-card__body">
       <span class="proj-card__status<?php echo $status === '已完成' ? ' proj-card__status--done' : ''; ?>"><?php echo esc_html( $status ); ?></span>
       <h3 class="proj-card__title"><a href="<?php echo esc_url( get_permalink( $project ) ); ?>"><?php echo esc_html( get_the_title( $project ) ); ?></a></h3>
-      <div class="proj-card__meta"><?php echo esc_html( yigeren_project_date( $project ) ); ?></div>
+      <?php $pdate = yigeren_project_date( $project ); if ( $pdate ) : ?>
+      <div class="proj-card__meta"><?php echo esc_html( $pdate ); ?></div>
+      <?php endif; ?>
       <p class="proj-card__excerpt"><?php echo esc_html( wp_trim_words( $excerpt, 40 ) ); ?></p>
       <a href="<?php echo esc_url( get_permalink( $project ) ); ?>" class="proj-card__link">查看详情 <span>&rarr;</span></a>
     </div>

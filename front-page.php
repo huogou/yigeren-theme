@@ -187,7 +187,9 @@ $projects = yigeren_projects_sorted( 5 );
         <span class="proj-row__name"><?php echo esc_html( get_the_title( $project ) ); ?></span>
         <span class="proj-row__desc"><?php echo esc_html( wp_trim_words( $excerpt, 30 ) ); ?></span>
         <span class="proj-row__status"><?php echo esc_html( $status ); ?></span>
-        <span class="proj-row__date"><?php echo esc_html( yigeren_project_date( $project ) ); ?></span>
+        <?php $pdate = yigeren_project_date( $project ); if ( $pdate ) : ?>
+        <span class="proj-row__date"><?php echo esc_html( $pdate ); ?></span>
+        <?php endif; ?>
       </a>
       <?php endforeach; ?>
     </div>

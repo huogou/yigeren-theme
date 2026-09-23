@@ -198,8 +198,9 @@ function yigeren_projects_sorted( $posts_per_page = -1 ) {
     usort( $projects, function( $a, $b ) {
         $ua = get_post_meta( $a->ID, 'project_update_date', true );
         $ub = get_post_meta( $b->ID, 'project_update_date', true );
-        if ( ! $ua ) { $ua = $a->post_date; }
-        if ( ! $ub ) { $ub = $b->post_date; }
+        // Fall back to WordPress's real last-modified time when no confirmed update date.
+        if ( ! $ua ) { $ua = $a->post_modified; }
+        if ( ! $ub ) { $ub = $b->post_modified; }
         if ( $ua !== $ub ) {
             return strtotime( $ub ) - strtotime( $ua ); // newer first
         }
@@ -222,12 +223,14 @@ function yigeren_project_status( $post = null ) {
 
 /**
  * Format project update date as "2026年9月".
+ * Returns empty when no confirmed update date exists — the front end
+ * then hides the date (no unverifiable dates are shown).
  */
 function yigeren_project_date( $post = null ) {
     $post = get_post( $post );
     if ( ! $post ) { return ''; }
     $date = get_post_meta( $post->ID, 'project_update_date', true );
-    if ( ! $date ) { $date = $post->post_date; }
+    if ( ! $date ) { return ''; }
     return date_i18n( 'Y年n月', strtotime( $date ) );
 }
 
