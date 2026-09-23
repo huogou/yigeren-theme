@@ -19,7 +19,7 @@
 | 最大改动风险 | ①分类 slug 硬编码在 `functions.php`；②`footer.php`/`page-about.php` 内嵌 67.8 KB base64 图片；③模板内硬编码绝对域名 |
 | 数据依赖 | 主题**只含代码，不含文章数据**。文章、分类、媒体库存在数据库与 `wp-content/uploads`，不在本仓库 |
 
-**修改前必读**：本主题把内容结构（5 个分类 slug、2 个页面 slug、3 个自定义字段）写死在代码里，
+**修改前必读**：本主题把内容结构（6 个分类 slug、2 个页面 slug、文章级自定义字段 + 项目级 5 字段）写死在代码里，
 仅同步代码而不配置对应的 WordPress 内容结构，页面会出现空白或降级显示。
 
 ---
@@ -94,8 +94,10 @@ yigeren-theme/                      # 仓库根目录 = WordPress 主题目录�
 | `cat` | 猫咪 | Cat | 猫 | 年糕，一只橘猫，正在认真地长大。 |
 | `photo` | 摄影 | Photography | 光 | 用相机记住那些不值得写文章但值得记住的瞬间。 |
 | `notes` | 笔记 | Notes | 筆 | 想到什么就记下来，不一定完整，但值得留下。 |
+| `projects` | 折腾 | Projects | 造 | 记录那些利用互联网、AI和兴趣做出来的小东西，有的是完整作品，有的是一次尝试。 |
 
 未命中映射的分类会**直接回显 slug 原文**（`yigeren_category_label()` 的兜底逻辑）。
+分类 URL 为**根级形态**（`/life/`、`/projects/`），由 `functions.php` 的 `yigeren_root_category_rewrites()` 在 `init` 时为每个分类注册重写规则；新增分类后需 `wp rewrite flush` 一次。
 
 ### 5.2 必须存在的页面
 
@@ -112,7 +114,20 @@ yigeren-theme/                      # 仓库根目录 = WordPress 主题目录�
 | `_yigeren_distance` | 骑行距离，形如 `128 km` | `single.php` 文章头部 meta |
 | `_yigeren_location` | 地点 | `single.php` 文章头部 meta |
 
-### 5.4 其他配置点
+### 5.4 项目字段（仅 projects 分类文章使用）
+
+| meta key | 取值 | 说明 |
+| --- | --- | --- |
+| `project_status` | `进行中` / `已完成` | 项目状态；缺省视为「进行中」 |
+| `project_start_date` | 日期字符串 | 项目开始时间（策划补充真实时间，未确认则留空） |
+| `project_update_date` | 日期字符串 | 更新时间，作为项目排序依据；留空时前台隐藏日期、排序兜底用 WP `post_modified` |
+| `project_link` | URL | 项目在线地址 |
+| `project_cover` | 图片 URL | 项目封面；留空时前台显示「造」字斜纹占位 |
+
+> 项目排序规则（`yigeren_projects_sorted()`）：按 `project_update_date` 降序（缺省回退 `post_modified`），
+> 同时间「进行中」优先。分类页按「进行中分组在前、已完成随后」展示。
+
+### 5.5 其他配置点
 
 - **菜单位置**：`primary`（主导航）、`social`（社交链接）。未分配菜单时走 `header.php` 中的 `yigeren_fallback_menu()` 自动生成。
 - **缩略图尺寸**：`article-cover` 880×495、`card-cover` 520×347、`photo-large` 680×453。
@@ -259,11 +274,18 @@ python sync_theme.py --upload
 | --- | --- |
 | 主题名称 | 一个人的互联网笔记 |
 | Text Domain | `yigeren` |
-| 版本 | 1.0.0 |
+| 版本 | 1.0.0（V1.0 已上线并通过策划验收） |
 | 作者 | Yizu（`style.css` 主题头记录） |
 | 许可 | GNU GPL v2 or later |
-| 入库文件数 | 11（含 `.gitignore`、`README.md`），共 2259 行 |
+| 入库文件数 | 11（含 `.gitignore`、`README.md`） |
 | 源码来源 | 阿里云轻量应用服务器 `8.137.48.145`，SFTP 拉取 |
 | 首版提交 | `d5a1a90` |
 | 远端仓库 | `https://github.com/huogou/yigeren-theme`（已推送，**private**，2026-09-23 转私有） |
 | 推送方式 | HTTPS + PAT（PAT 仅临时用于 `git push`，未写入任何配置，用完即弃） |
+
+### 当前进度（2026-09-23）
+
+- **V1.0 已上线并通过策划验收**：新增「折腾」分类 + 首页改版 + `/projects` 分类页 + 4 篇项目文章 + 项目 5 字段；
+  上线前设计体检 4 项修复（导航毛玻璃、水印溢出、月份错显、摄影命名统一）均已落地。
+- **下一阶段（策划主导）**：完善 4 个项目文章内容与项目素材；V1.1 补真实项目封面图。
+- 详细交付与拍板记录见 `AI生成文件/给策划AI同步-开发交付.txt`。
