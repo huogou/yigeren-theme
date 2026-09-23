@@ -16,24 +16,9 @@ get_header();
       <span class="hero-kanji">記</span>
       <h1 class="hero-title">一个人的<br>互联网笔记</h1>
       <div class="hero-divider"></div>
-      <p class="hero-tagline">骑着摩托去远方，回到家有猫在等</p>
-      <p class="hero-desc">在这里记录生活里那些值得慢下来的瞬间</p>
-      <div class="hero-categories">
-        <a href="<?php echo esc_url( home_url( '/life/' ) ); ?>">
-          <span class="hero-cat-icon">◐</span>生活
-        </a>
-        <a href="<?php echo esc_url( home_url( '/moto/' ) ); ?>">
-          <span class="hero-cat-icon">◐</span>摩托
-        </a>
-        <a href="<?php echo esc_url( home_url( '/cat/' ) ); ?>">
-          <span class="hero-cat-icon">◐</span>猫咪
-        </a>
-        <a href="<?php echo esc_url( home_url( '/photo/' ) ); ?>">
-          <span class="hero-cat-icon">◐</span>光影
-        </a>
-        <a href="<?php echo esc_url( home_url( '/notes/' ) ); ?>">
-          <span class="hero-cat-icon">◐</span>笔记
-        </a>
+      <p class="hero-tagline">记录骑车、摄影、养猫，以及利用互联网和AI做的一些小东西。</p>
+      <div class="hero-cta-wrap">
+        <a href="<?php echo esc_url( home_url( '/projects/' ) ); ?>" class="hero-cta">看看我折腾过什么 <span>&rarr;</span></a>
       </div>
     </div>
     <div class="hero-scroll-hint">
@@ -45,6 +30,40 @@ get_header();
       </svg>
     </div>
   </header>
+
+<!-- Category Contents (seal directory) -->
+<section class="section" data-component="contents">
+  <div class="container--wide">
+    <div class="section__header reveal">
+      <div>
+        <span class="section__label">Contents</span>
+        <h2 style="margin-top:8px;">我记些什么</h2>
+      </div>
+    </div>
+    <div class="seal-row reveal reveal-delay-1">
+      <?php
+      $home_cats = array(
+        'life'     => array( '日', '生活', 'Life',     '最近在骑车、拍照和陪猫晒太阳。' ),
+        'moto'     => array( '道', '摩托', 'Riding',   '两个轮子，一条路，够了。' ),
+        'cat'      => array( '猫', '猫咪', 'Cat',      '年糕，一只橘猫，正在认真地长大。' ),
+        'photo'    => array( '光', '摄影', 'Photography', '用相机记住那些不值得写文章但值得记住的瞬间。' ),
+        'notes'    => array( '筆', '笔记', 'Notes',    '想到什么就记下来，不一定完整，但值得留下。' ),
+        'projects' => array( '造', '折腾', 'Projects', '记录那些利用互联网、AI和兴趣做出来的小东西，有的是完整作品，有的是一次尝试。' ),
+      );
+      foreach ( $home_cats as $slug => $info ) :
+        $cat = get_category_by_slug( $slug );
+      ?>
+      <a href="<?php echo esc_url( $cat ? get_category_link( $cat ) : home_url( '/' . $slug . '/' ) ); ?>" class="seal">
+        <span class="seal__kanji"><?php echo esc_html( $info[0] ); ?></span>
+        <span class="seal__name"><?php echo esc_html( $info[1] ); ?></span>
+        <span class="seal__en"><?php echo esc_html( $info[2] ); ?></span>
+        <span class="seal__arrow">&rarr;</span>
+        <span class="seal__desc"><?php echo esc_html( $info[3] ); ?></span>
+      </a>
+      <?php endforeach; ?>
+    </div>
+  </div>
+</section>
 
 <!-- Recent Timeline -->
 <section class="section" data-component="timeline">
@@ -60,7 +79,7 @@ get_header();
     if ( $recent->have_posts() ) :
       $current_month = '';
       while ( $recent->have_posts() ) : $recent->the_post();
-        $post_month = date_i18n( 'F Y', strtotime( get_the_date() ) );
+        $post_month = date_i18n( 'Y年n月', get_post_timestamp() );
         if ( $post_month !== $current_month ) :
           $current_month = $post_month;
     ?>
@@ -85,81 +104,98 @@ get_header();
   </div>
 </section>
 
-<!-- Motorcycle (latest post from moto category) -->
-<?php
-$moto_query = yigeren_category_query( 'moto', 1 );
-if ( $moto_query->have_posts() ) :
-  $moto_query->the_post();
-?>
-<section class="section" data-component="motorcycle">
+<!-- Riding & Cat (two columns) -->
+<section class="section" data-component="riding-cat">
   <div class="container--wide">
     <div class="section__header reveal">
       <div>
-        <span class="section__label">Riding</span>
-        <h2 style="margin-top:8px;">摩托骑行</h2>
+        <span class="section__label">Riding &amp; Cat</span>
+        <h2 style="margin-top:8px;">最近的路与猫</h2>
       </div>
-      <?php $moto_cat = get_category_by_slug( 'moto' ); if ( $moto_cat ) : ?>
-      <a href="<?php echo esc_url( get_category_link( $moto_cat ) ); ?>" class="section__more">更多骑行记录 &rarr;</a>
-      <?php endif; ?>
     </div>
-    <div class="featured reveal reveal-delay-1">
-      <div class="featured__cover">
-        <?php if ( has_post_thumbnail() ) : ?>
-          <?php the_post_thumbnail( 'article-cover' ); ?>
-        <?php endif; ?>
+    <div class="duo reveal reveal-delay-1">
+      <?php
+      $moto_query = yigeren_category_query( 'moto', 1 );
+      if ( $moto_query->have_posts() ) :
+        $moto_query->the_post();
+      ?>
+      <a href="<?php the_permalink(); ?>" class="duo__half">
+        <span class="duo__tag">道 · 摩托</span>
+        <div class="duo__title"><?php the_title(); ?></div>
+        <div class="duo__meta"><?php echo esc_html( yigeren_full_date() ); ?></div>
+        <p class="duo__excerpt"><?php echo wp_kses_post( wp_trim_words( get_the_excerpt(), 30 ) ); ?></p>
+        <span class="duo__link">阅读全文 <span>&rarr;</span></span>
+      </a>
+      <?php
+        wp_reset_postdata();
+      else :
+      ?>
+      <div class="duo__half">
+        <span class="duo__tag">道 · 摩托</span>
+        <p class="duo__excerpt">还没有骑行记录。</p>
       </div>
-      <div>
-        <div class="featured__date"><?php echo esc_html( yigeren_full_date() ); ?></div>
-        <h2><?php the_title(); ?></h2>
-        <p class="featured__text"><?php echo wp_kses_post( wp_trim_words( get_the_excerpt(), 40 ) ); ?></p>
-        <a href="<?php the_permalink(); ?>" class="featured__link">阅读全文 <span>&rarr;</span></a>
+      <?php endif; ?>
+      <?php
+      $cat_query = yigeren_category_query( 'cat', 1 );
+      if ( $cat_query->have_posts() ) :
+        $cat_query->the_post();
+      ?>
+      <a href="<?php the_permalink(); ?>" class="duo__half">
+        <span class="duo__tag">猫 · 猫咪</span>
+        <div class="duo__title"><?php the_title(); ?></div>
+        <div class="duo__meta"><?php $mood = yigeren_post_mood(); echo esc_html( $mood ? $mood . ' · ' : '' ); echo esc_html( yigeren_full_date() ); ?></div>
+        <p class="duo__excerpt"><?php echo wp_kses_post( wp_trim_words( get_the_excerpt(), 30 ) ); ?></p>
+        <span class="duo__link">阅读全文 <span>&rarr;</span></span>
+      </a>
+      <?php
+        wp_reset_postdata();
+      else :
+      ?>
+      <div class="duo__half">
+        <span class="duo__tag">猫 · 猫咪</span>
+        <p class="duo__excerpt">还没有猫咪记录。</p>
       </div>
+      <?php endif; ?>
     </div>
   </div>
 </section>
-<?php
-  wp_reset_postdata();
-endif;
-?>
 
-<!-- Cat (latest post from cat category) -->
+<!-- Projects (dynamic from projects category) -->
 <?php
-$cat_query = yigeren_category_query( 'cat', 1 );
-if ( $cat_query->have_posts() ) :
-  $cat_query->the_post();
+$projects = yigeren_projects_sorted( 5 );
 ?>
-<section class="section" data-component="cat">
+<section class="section" data-component="projects">
+  <div class="section__kanji" aria-hidden="true">造</div>
   <div class="container--wide">
     <div class="section__header reveal">
       <div>
-        <span class="section__label">Cat</span>
-        <h2 style="margin-top:8px;">猫咪日常</h2>
+        <span class="section__label">Projects</span>
+        <h2 style="margin-top:8px;">我在折腾什么</h2>
       </div>
-      <?php $cat_cat = get_category_by_slug( 'cat' ); if ( $cat_cat ) : ?>
-      <a href="<?php echo esc_url( get_category_link( $cat_cat ) ); ?>" class="section__more">更多猫咪故事 &rarr;</a>
+      <?php $projects_cat = get_category_by_slug( 'projects' ); if ( $projects_cat ) : ?>
+      <a href="<?php echo esc_url( get_category_link( $projects_cat ) ); ?>" class="section__more">全部折腾 &rarr;</a>
       <?php endif; ?>
     </div>
-    <div class="featured reveal reveal-delay-1" style="grid-template-columns: 1fr 1.1fr;">
-      <div>
-        <?php $mood = yigeren_post_mood(); if ( $mood ) : ?>
-        <span class="diary__mood" style="margin-bottom:12px;"><?php echo esc_html( $mood ); ?></span>
-        <?php endif; ?>
-        <h2 style="margin-top:8px;"><?php the_title(); ?></h2>
-        <p class="featured__text"><?php echo wp_kses_post( wp_trim_words( get_the_excerpt(), 40 ) ); ?></p>
-        <a href="<?php the_permalink(); ?>" class="featured__link">阅读全文 <span>&rarr;</span></a>
-      </div>
-      <div class="featured__cover">
-        <?php if ( has_post_thumbnail() ) : ?>
-          <?php the_post_thumbnail( 'article-cover' ); ?>
-        <?php endif; ?>
-      </div>
+    <?php if ( ! empty( $projects ) ) : ?>
+    <div class="proj-list reveal reveal-delay-1">
+      <?php foreach ( $projects as $project ) :
+        $status = yigeren_project_status( $project );
+        $excerpt = get_the_excerpt( $project );
+      ?>
+      <a href="<?php echo esc_url( get_permalink( $project ) ); ?>" class="proj-row">
+        <span class="proj-row__dot<?php echo $status === '已完成' ? ' proj-row__dot--done' : ''; ?>"></span>
+        <span class="proj-row__name"><?php echo esc_html( get_the_title( $project ) ); ?></span>
+        <span class="proj-row__desc"><?php echo esc_html( wp_trim_words( $excerpt, 30 ) ); ?></span>
+        <span class="proj-row__status"><?php echo esc_html( $status ); ?></span>
+        <span class="proj-row__date"><?php echo esc_html( yigeren_project_date( $project ) ); ?></span>
+      </a>
+      <?php endforeach; ?>
     </div>
+    <?php else : ?>
+    <div class="proj-empty reveal reveal-delay-1">第一个项目还在路上。</div>
+    <?php endif; ?>
   </div>
 </section>
-<?php
-  wp_reset_postdata();
-endif;
-?>
 
 <!-- Latest Articles -->
 <section class="section" data-component="articles">
@@ -197,88 +233,6 @@ endif;
       endif;
       ?>
     </ul>
-  </div>
-</section>
-
-<!-- 孩子回家 Project Section -->
-<section class="section" id="project" data-component="project">
-  <div class="section__kanji" aria-hidden="true">家</div>
-  <div class="container--wide">
-    <div class="section__header reveal">
-      <div>
-        <span class="section__label">Project</span>
-        <h2>孩子回家</h2>
-      </div>
-    </div>
-    <div class="project-card reveal reveal-delay-1">
-      <div class="project-card__illustration">
-        <svg viewBox="0 0 480 360" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="孩子回家插画">
-          <rect width="480" height="360" fill="var(--seed-surface)"/>
-          <rect width="480" height="200" fill="var(--seed-bg)"/>
-          <circle cx="380" cy="60" r="30" fill="var(--seed-fg)" opacity="0.08"/>
-          <circle cx="380" cy="60" r="22" fill="var(--seed-fg)" opacity="0.06"/>
-          <circle cx="388" cy="54" r="22" fill="var(--seed-bg)"/>
-          <circle cx="60" cy="35" r="1.2" fill="var(--seed-fg)" opacity="0.25"/>
-          <circle cx="120" cy="55" r="0.8" fill="var(--seed-fg)" opacity="0.2"/>
-          <circle cx="200" cy="28" r="1" fill="var(--seed-fg)" opacity="0.3"/>
-          <circle cx="280" cy="45" r="0.7" fill="var(--seed-fg)" opacity="0.15"/>
-          <circle cx="320" cy="22" r="1.1" fill="var(--seed-fg)" opacity="0.2"/>
-          <circle cx="440" cy="38" r="0.9" fill="var(--seed-fg)" opacity="0.18"/>
-          <circle cx="160" cy="70" r="0.6" fill="var(--seed-fg)" opacity="0.15"/>
-          <path d="M0 180 Q60 150 140 165 Q220 140 300 158 Q380 135 480 155 L480 200 L0 200Z" fill="var(--seed-border)" opacity="0.3"/>
-          <rect y="195" width="480" height="165" fill="var(--seed-border)" opacity="0.15"/>
-          <path d="M240 360 Q238 300 235 260 Q230 220 240 200" fill="none" stroke="var(--seed-muted)" stroke-width="20" opacity="0.08"/>
-          <path d="M240 360 Q238 300 235 260 Q230 220 240 200" fill="none" stroke="var(--seed-muted)" stroke-width="1.5" opacity="0.15" stroke-dasharray="4 6"/>
-          <rect x="210" y="175" width="60" height="35" fill="var(--seed-border)" opacity="0.5"/>
-          <polygon points="205,175 240,148 275,175" fill="var(--seed-border)" opacity="0.6"/>
-          <rect x="232" y="192" width="16" height="18" fill="var(--seed-accent)" opacity="0.2"/>
-          <rect x="216" y="183" width="10" height="8" fill="var(--seed-accent)" opacity="0.25"/>
-          <rect x="254" y="183" width="10" height="8" fill="var(--seed-accent)" opacity="0.25"/>
-          <ellipse cx="240" cy="210" rx="25" ry="8" fill="var(--seed-accent)" opacity="0.06"/>
-          <g transform="translate(240, 275)">
-            <ellipse cx="0" cy="8" rx="6" ry="10" fill="var(--seed-fg)" opacity="0.25"/>
-            <circle cx="0" cy="-6" r="5" fill="var(--seed-fg)" opacity="0.25"/>
-            <rect x="3" y="-2" width="5" height="8" rx="1" fill="var(--seed-accent)" opacity="0.2"/>
-            <ellipse cx="0" cy="20" rx="8" ry="2" fill="var(--seed-fg)" opacity="0.05"/>
-          </g>
-          <g transform="translate(240, 188)">
-            <ellipse cx="0" cy="4" rx="4" ry="7" fill="var(--seed-accent)" opacity="0.3"/>
-            <circle cx="0" cy="-5" r="3.5" fill="var(--seed-accent)" opacity="0.3"/>
-            <path d="M-4 0 Q-10 2 -12 6" fill="none" stroke="var(--seed-accent)" stroke-width="1.5" opacity="0.25" stroke-linecap="round"/>
-          </g>
-          <g opacity="0.15">
-            <rect x="80" y="170" width="4" height="30" fill="var(--seed-muted)"/>
-            <ellipse cx="82" cy="165" rx="14" ry="20" fill="var(--seed-muted)" opacity="0.6"/>
-          </g>
-          <g opacity="0.12">
-            <rect x="380" y="175" width="3" height="25" fill="var(--seed-muted)"/>
-            <ellipse cx="381" cy="170" rx="12" ry="18" fill="var(--seed-muted)" opacity="0.6"/>
-          </g>
-          <circle cx="180" cy="230" r="1.5" fill="var(--seed-accent)" opacity="0.2"/>
-          <circle cx="300" cy="245" r="1" fill="var(--seed-accent)" opacity="0.15"/>
-          <circle cx="150" cy="255" r="1.2" fill="var(--seed-accent)" opacity="0.12"/>
-          <circle cx="330" cy="220" r="0.8" fill="var(--seed-accent)" opacity="0.18"/>
-          <text x="240" y="340" text-anchor="middle" font-family="Caveat, cursive" font-size="14" fill="var(--seed-muted)" opacity="0.35">every child deserves a way home</text>
-        </svg>
-      </div>
-      <div class="project-card__body">
-        <span class="project-card__tag">公益小程序</span>
-        <div class="annotation annotation--right" style="margin-bottom: 4px;">every child deserves a way home</div>
-        <h2>孩子回家</h2>
-        <p>一个帮助走失儿童家庭团聚的公益小程序。通过发布和扩散寻亲信息，让更多人看到，让每一个走失的孩子都能找到回家的路。</p>
-        <div class="project-card__stats">
-          <div class="project-card__stat">
-            <span class="project-card__stat-num">36</span>
-            <span class="project-card__stat-label">条寻亲信息</span>
-          </div>
-          <div class="project-card__stat">
-            <span class="project-card__stat-num">180+</span>
-            <span class="project-card__stat-label">天</span>
-          </div>
-        </div>
-        <button class="project-card__link" data-qr-modal-open type="button">扫码使用 <span>&rarr;</span></button>
-      </div>
-    </div>
   </div>
 </section>
 

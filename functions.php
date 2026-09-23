@@ -78,11 +78,12 @@ add_filter( 'excerpt_more', 'yigeren_excerpt_more' );
  */
 function yigeren_category_label( $cat_slug ) {
     $labels = array(
-        'life'  => '生活',
-        'moto'  => '摩托',
-        'cat'   => '猫咪',
-        'photo' => '摄影',
-        'notes' => '笔记',
+        'life'     => '生活',
+        'moto'     => '摩托',
+        'cat'      => '猫咪',
+        'photo'    => '摄影',
+        'notes'    => '笔记',
+        'projects' => '折腾',
     );
     return isset( $labels[ $cat_slug ] ) ? $labels[ $cat_slug ] : $cat_slug;
 }
@@ -92,11 +93,12 @@ function yigeren_category_label( $cat_slug ) {
  */
 function yigeren_category_en( $cat_slug ) {
     $labels = array(
-        'life'  => 'Life',
-        'moto'  => 'Riding',
-        'cat'   => 'Cat',
-        'photo' => 'Photography',
-        'notes' => 'Notes',
+        'life'     => 'Life',
+        'moto'     => 'Riding',
+        'cat'      => 'Cat',
+        'photo'    => 'Photography',
+        'notes'    => 'Notes',
+        'projects' => 'Projects',
     );
     return isset( $labels[ $cat_slug ] ) ? $labels[ $cat_slug ] : $cat_slug;
 }
@@ -106,11 +108,12 @@ function yigeren_category_en( $cat_slug ) {
  */
 function yigeren_category_kanji( $cat_slug ) {
     $kanji = array(
-        'life'  => '日',
-        'moto'  => '道',
-        'cat'   => '猫',
-        'photo' => '光',
-        'notes' => '筆',
+        'life'     => '日',
+        'moto'     => '道',
+        'cat'      => '猫',
+        'photo'    => '光',
+        'notes'    => '筆',
+        'projects' => '造',
     );
     return isset( $kanji[ $cat_slug ] ) ? $kanji[ $cat_slug ] : '記';
 }
@@ -174,6 +177,61 @@ function yigeren_category_query( $cat_slug, $posts_per_page = 20 ) {
 }
 
 /**
+ * Get project posts (category: projects), sorted by project_update_date
+ * descending; on equal dates, in-progress projects come first.
+ * Reads live category data — never hardcode the list.
+ */
+function yigeren_projects_sorted( $posts_per_page = -1 ) {
+    $query = new WP_Query( array(
+        'category_name'  => 'projects',
+        'posts_per_page' => $posts_per_page,
+        'post_status'    => 'publish',
+    ) );
+    $projects = array();
+    if ( $query->have_posts() ) {
+        while ( $query->have_posts() ) {
+            $query->the_post();
+            $projects[] = get_post();
+        }
+        wp_reset_postdata();
+    }
+    usort( $projects, function( $a, $b ) {
+        $ua = get_post_meta( $a->ID, 'project_update_date', true );
+        $ub = get_post_meta( $b->ID, 'project_update_date', true );
+        if ( ! $ua ) { $ua = $a->post_date; }
+        if ( ! $ub ) { $ub = $b->post_date; }
+        if ( $ua !== $ub ) {
+            return strtotime( $ub ) - strtotime( $ua ); // newer first
+        }
+        $wa = ( yigeren_project_status( $a ) === '已完成' ) ? 1 : 0;
+        $wb = ( yigeren_project_status( $b ) === '已完成' ) ? 1 : 0;
+        return $wa - $wb; // in-progress first on equal dates
+    } );
+    return $projects;
+}
+
+/**
+ * Get project status from meta; defaults to in-progress.
+ */
+function yigeren_project_status( $post = null ) {
+    $post = get_post( $post );
+    if ( ! $post ) { return '进行中'; }
+    $status = get_post_meta( $post->ID, 'project_status', true );
+    return in_array( $status, array( '进行中', '已完成' ), true ) ? $status : '进行中';
+}
+
+/**
+ * Format project update date as "2026年9月".
+ */
+function yigeren_project_date( $post = null ) {
+    $post = get_post( $post );
+    if ( ! $post ) { return ''; }
+    $date = get_post_meta( $post->ID, 'project_update_date', true );
+    if ( ! $date ) { $date = $post->post_date; }
+    return date_i18n( 'Y年n月', strtotime( $date ) );
+}
+
+/**
  * Get recent posts grouped by month
  */
 function yigeren_timeline_posts( $cat_slug = '', $limit = 30 ) {
@@ -191,7 +249,7 @@ function yigeren_timeline_posts( $cat_slug = '', $limit = 30 ) {
     if ( $query->have_posts() ) {
         while ( $query->have_posts() ) {
             $query->the_post();
-            $month_key = date_i18n( 'Y-m', strtotime( get_the_date() ) );
+            $month_key = get_post_time( 'Y-m' );
             $grouped[ $month_key ][] = get_post();
         }
         wp_reset_postdata();
@@ -247,3 +305,18 @@ function disable_comments_completely() {
     add_filter('pings_open', '__return_false');
 }
 add_action('init', 'disable_comments_completely');
+
+/**
+ * Root-level category URLs (e.g. /life/, /projects/).
+ * The site's internal links use root-level category paths; register a rewrite
+ * rule per category so the mapping survives any permalink flush.
+ */
+function yigeren_root_category_rewrites() {
+    $categories = get_categories( array( 'hide_empty' => false ) );
+    foreach ( $categories as $category ) {
+        if ( 'uncategorized' === $category->slug ) { continue; }
+        add_rewrite_rule( $category->slug . '/?$', 'index.php?category_name=' . $category->slug, 'top' );
+        add_rewrite_rule( $category->slug . '/page/?([0-9]{1,})/?$', 'index.php?category_name=' . $category->slug . '&paged=$matches[1]', 'top' );
+    }
+}
+add_action( 'init', 'yigeren_root_category_rewrites' );

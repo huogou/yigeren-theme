@@ -49,8 +49,8 @@
 function yigeren_fallback_menu() {
   echo '<ul class="nav__links" id="navLinks">';
   echo '<li><a href="' . esc_url( home_url( '/' ) ) . '">首页</a></li>';
-  $cats = array( 'life', 'moto', 'cat', 'photo', 'notes' );
-  $labels = array( '生活', '摩托', '猫咪', '摄影', '笔记' );
+  $cats = array( 'life', 'moto', 'cat', 'photo', 'notes', 'projects' );
+  $labels = array( '生活', '摩托', '猫咪', '摄影', '笔记', '折腾' );
   foreach ( $cats as $i => $slug ) {
     $cat = get_category_by_slug( $slug );
     if ( $cat ) {

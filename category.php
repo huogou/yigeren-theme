@@ -134,6 +134,57 @@ elseif ( $cat_slug === 'photo' ) :
     wp_reset_postdata();
   endif;
 
+// === PROJECTS: Status-grouped project list ===
+elseif ( $cat_slug === 'projects' ) :
+  $project_posts = yigeren_projects_sorted();
+  $ongoing = array();
+  $done    = array();
+  foreach ( $project_posts as $project ) {
+    if ( yigeren_project_status( $project ) === '已完成' ) {
+      $done[] = $project;
+    } else {
+      $ongoing[] = $project;
+    }
+  }
+  if ( empty( $project_posts ) ) :
+?>
+  <div class="proj-empty reveal">第一个项目还在路上。</div>
+<?php
+  else :
+    $groups = array( array( '— 进行中 —', $ongoing ), array( '— 已完成 —', $done ) );
+    foreach ( $groups as $group ) :
+      list( $group_label, $group_posts ) = $group;
+      if ( empty( $group_posts ) ) { continue; }
+?>
+  <div class="proj-group reveal"><?php echo esc_html( $group_label ); ?></div>
+  <?php foreach ( $group_posts as $project ) :
+    $status    = yigeren_project_status( $project );
+    $excerpt   = get_the_excerpt( $project );
+    $cover_url = get_post_meta( $project->ID, 'project_cover', true );
+  ?>
+  <div class="proj-card reveal">
+    <div class="proj-card__cover">
+      <?php if ( $cover_url ) : ?>
+        <img src="<?php echo esc_url( $cover_url ); ?>" alt="<?php echo esc_attr( get_the_title( $project ) ); ?>">
+      <?php elseif ( has_post_thumbnail( $project ) ) : ?>
+        <?php echo get_the_post_thumbnail( $project, 'card-cover' ); ?>
+      <?php else : ?>
+        <span class="proj-card__cover-kanji" aria-hidden="true">造</span>
+      <?php endif; ?>
+    </div>
+    <div class="proj-card__body">
+      <span class="proj-card__status<?php echo $status === '已完成' ? ' proj-card__status--done' : ''; ?>"><?php echo esc_html( $status ); ?></span>
+      <h3 class="proj-card__title"><a href="<?php echo esc_url( get_permalink( $project ) ); ?>"><?php echo esc_html( get_the_title( $project ) ); ?></a></h3>
+      <div class="proj-card__meta"><?php echo esc_html( yigeren_project_date( $project ) ); ?></div>
+      <p class="proj-card__excerpt"><?php echo esc_html( wp_trim_words( $excerpt, 40 ) ); ?></p>
+      <a href="<?php echo esc_url( get_permalink( $project ) ); ?>" class="proj-card__link">查看详情 <span>&rarr;</span></a>
+    </div>
+  </div>
+  <?php endforeach; ?>
+<?php
+    endforeach;
+  endif;
+
 // === NOTES: Minimal List ===
 elseif ( $cat_slug === 'notes' ) :
   $note_posts = yigeren_category_query( 'notes', 30 );
@@ -157,7 +208,7 @@ else :
   $timeline = yigeren_timeline_posts( $cat_slug );
   foreach ( $timeline as $month_key => $posts ) :
     $month_parts = explode( '-', $month_key );
-    $month_label = date_i18n( 'F Y', mktime( 0, 0, 0, intval( $month_parts[1] ), 1, intval( $month_parts[0] ) ) );
+    $month_label = date_i18n( 'Y年n月', mktime( 0, 0, 0, intval( $month_parts[1] ), 1, intval( $month_parts[0] ) ) );
 ?>
   <div class="diary__month reveal"><?php echo esc_html( $month_label ); ?></div>
   <?php foreach ( $posts as $post ) : setup_postdata( $post ); ?>
