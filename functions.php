@@ -39,12 +39,12 @@ add_action( 'after_setup_theme', 'yigeren_setup' );
  * Enqueue Styles and Scripts
  */
 function yigeren_scripts() {
-    // Google Fonts
+    // Local fonts (fonts.css + fonts/, no third-party mirror dependency)
     wp_enqueue_style(
         'yigeren-fonts',
-        'https://fonts.loli.net/css2?family=Noto+Serif+SC:wght@400;500;600&family=EB+Garamond:ital,wght@0,400;0,500;0,600;1,400&family=Noto+Sans+SC:wght@300;400;500&family=Caveat:wght@400;500&display=swap',
+        get_theme_file_uri( 'fonts.css' ),
         array(),
-        null
+        filemtime( get_theme_file_path( 'fonts.css' ) )
     );
 
     // Theme CSS
@@ -56,6 +56,37 @@ function yigeren_scripts() {
     );
 }
 add_action( 'wp_enqueue_scripts', 'yigeren_scripts' );
+
+/**
+ * Ensure the primary navigation contains the "折腾" (projects) entry.
+ *
+ * Final order: 首页 · 生活 · 摩托 · 猫咪 · 摄影 · 笔记 · 折腾 · 归档 · 关于
+ * "归档" is kept. When a menu is assigned in the admin the item is injected
+ * right before 归档; if 折腾 is already present (e.g. the fallback menu) or the
+ * projects category does not exist, the menu is returned untouched.
+ */
+function yigeren_nav_projects_item( $items, $args ) {
+    if ( empty( $args->theme_location ) || 'primary' !== $args->theme_location ) {
+        return $items;
+    }
+    if ( false !== strpos( $items, '/projects/' ) ) {
+        return $items; // already present
+    }
+    $cat = get_category_by_slug( 'projects' );
+    if ( ! $cat ) {
+        return $items;
+    }
+    $proj_li = '<li class="menu-item"><a href="' . esc_url( get_category_link( $cat ) ) . '">'
+        . esc_html( yigeren_category_label( 'projects' ) ) . '</a></li>';
+
+    if ( preg_match( '/<li[^>]*>(?:(?!<\/li>).)*?归档(?:(?!<\/li>).)*?<\/li>/us', $items, $m ) ) {
+        $items = str_replace( $m[0], $proj_li . $m[0], $items );
+    } else {
+        $items .= $proj_li;
+    }
+    return $items;
+}
+add_filter( 'wp_nav_menu_items', 'yigeren_nav_projects_item', 10, 2 );
 
 /**
  * Custom excerpt length
@@ -222,6 +253,35 @@ function yigeren_project_status( $post = null ) {
 }
 
 /**
+ * Project card placeholder kanji.
+ *
+ * Priority: the optional _yigeren_kanji field -> first character of the
+ * post title -> '造'. Set _yigeren_kanji in the editor to give a project its
+ * own kanji without touching the theme code.
+ */
+function yigeren_project_kanji( $post = null ) {
+    $post = get_post( $post );
+    if ( ! $post ) { return '造'; }
+
+    $kanji = trim( get_post_meta( $post->ID, '_yigeren_kanji', true ) );
+    if ( $kanji !== '' ) {
+        return $kanji;
+    }
+
+    $title = trim( get_the_title( $post ) );
+    if ( $title !== '' ) {
+        $first = function_exists( 'mb_substr' )
+            ? mb_substr( $title, 0, 1, 'UTF-8' )
+            : substr( $title, 0, 3 );
+        if ( $first !== '' ) {
+            return $first;
+        }
+    }
+
+    return '造';
+}
+
+/**
  * Format project update date as "2026年9月".
  * Returns empty when no confirmed update date exists — the front end
  * then hides the date (no unverifiable dates are shown).
@@ -308,6 +368,26 @@ function disable_comments_completely() {
     add_filter('pings_open', '__return_false');
 }
 add_action('init', 'disable_comments_completely');
+
+/**
+ * Remove the hand-written "状态：进行中" line from project posts.
+ *
+ * The status is now rendered as a badge in the article meta area from the
+ * same project_status field, so the plain-text duplicate is hidden at render
+ * time only — the stored post content is never modified. Only a paragraph
+ * whose entire content is the status label is removed.
+ */
+function yigeren_strip_manual_project_status( $content ) {
+    if ( ! is_singular() || ! in_category( 'projects' ) ) {
+        return $content;
+    }
+    return preg_replace(
+        '#<p>\s*(?:<strong>)?\s*\**\s*状态：\s*(?:进行中|已完成)\s*\**\s*(?:</strong>)?\s*</p>#u',
+        '',
+        $content
+    );
+}
+add_filter( 'the_content', 'yigeren_strip_manual_project_status', 20 );
 
 /**
  * Root-level category URLs (e.g. /life/, /projects/).

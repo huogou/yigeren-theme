@@ -29,6 +29,8 @@
 ```
 yigeren-theme/                      # 仓库根目录 = WordPress 主题目录（需整体放入 themes/）
 ├── style.css                       # 【必需】主题头信息 + 全站样式（1027 行，含 Design Tokens）
+├── fonts.css                       # 本地字体 @font-face 声明（按 unicode-range 分片）
+├── fonts/                          # 本地字体文件（woff2 子集，由设计 AI 用 fonttools 生成）
 ├── functions.php                   # 主题功能：主题支持、菜单、缩略图尺寸、业务工具函数
 ├── header.php                      # 全站页头：导航、阅读进度条容器、颗粒噪点 SVG
 ├── footer.php                      # 全站页脚：备案号、滚动动画/进度条 JS、「孩子回家」二维码弹窗
@@ -56,7 +58,7 @@ yigeren-theme/                      # 仓库根目录 = WordPress 主题目录�
 | 数据库 | MariaDB / MySQL | 由 WordPress 管理，主题不直接读写数据库 |
 | 样式 | 纯 CSS + CSS 自定义变量 | 无 Sass / PostCSS / Tailwind；设计令牌集中在 `style.css` 顶部 `:root` |
 | 脚本 | 原生 JavaScript | 内联于 `footer.php`：`IntersectionObserver` 滚动揭示、滚动阅读进度条、二维码弹窗 |
-| 字体 | Google Fonts 镜像 `fonts.loli.net` | Noto Serif SC / Noto Sans SC / EB Garamond / Caveat |
+| 字体 | 本地托管（`fonts.css` + `fonts/`，Fontsource 子集，GB2312 一级字集） | Noto Serif SC / Noto Sans SC / EB Garamond / Caveat，无第三方镜像依赖 |
 | 特效 | SVG `feTurbulence` | 全屏颗粒噪点遮罩（`.grain`） |
 | 同步工具 | Python 3 + paramiko（SFTP） | `sync_theme.py`，见第九节 |
 
@@ -259,8 +261,7 @@ python sync_theme.py --upload
    在 Linux 环境下编辑时建议保持既有风格，避免混入混合换行。
 6. **备份文件不入版本库**：`_backup_20260807/`、`*.bak`、`*.bak2` 等仍保留在本地磁盘，仅被忽略。
    如需纳入管理，删除 `.gitignore` 中对应规则即可。
-7. **字体依赖第三方镜像**：字体走 `fonts.loli.net`（Google Fonts 国内镜像）。
-   镜像不可用时排版会回退到系统字体，视觉观感会明显变化。
+7. **字体已本地化（2026-10-08）**：字体改为本地托管（`fonts.css` + `fonts/`，woff2 子集，GB2312 一级字集 + 全站实际用字），不再依赖 `fonts.loli.net` 等第三方镜像。新文章若使用极生僻字（GB2312 一级 3755 字之外）会优雅回退系统字体；新增固定文案时建议同步扩充子集字集。
 8. **无构建、无测试、无 CI**：改完即上传即生效，风险敞口直接暴露在线上。
    建议后续至少补充：staging 环境 + 提交前 `php -l` 语法检查。
 9. **许可**：主题声明为 **GPL-2.0 or later**（WordPress 主题生态的强制要求）。
@@ -277,7 +278,7 @@ python sync_theme.py --upload
 | 版本 | 1.0.0（V1.0 已上线并通过策划验收） |
 | 作者 | Yizu（`style.css` 主题头记录） |
 | 许可 | GNU GPL v2 or later |
-| 入库文件数 | 11（含 `.gitignore`、`README.md`） |
+| 入库文件 | 11 个源码/文档文件 + `fonts.css` + `fonts/`（642 个 woff2 子集切片，约 5.1 MB） |
 | 源码来源 | 阿里云轻量应用服务器 `8.137.48.145`，SFTP 拉取 |
 | 首版提交 | `d5a1a90` |
 | 远端仓库 | `https://github.com/huogou/yigeren-theme`（已推送，**private**，2026-09-23 转私有） |

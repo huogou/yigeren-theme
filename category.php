@@ -169,7 +169,7 @@ elseif ( $cat_slug === 'projects' ) :
       <?php elseif ( has_post_thumbnail( $project ) ) : ?>
         <?php echo get_the_post_thumbnail( $project, 'card-cover' ); ?>
       <?php else : ?>
-        <span class="proj-card__cover-kanji" aria-hidden="true">造</span>
+        <span class="proj-card__cover-kanji" aria-hidden="true"><?php echo esc_html( yigeren_project_kanji( $project ) ); ?></span>
       <?php endif; ?>
     </div>
     <div class="proj-card__body">

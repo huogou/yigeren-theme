@@ -14,9 +14,9 @@ get_header();
     </div>
     <div class="hero-content container">
       <span class="hero-kanji">記</span>
-      <h1 class="hero-title">一个人的<br>互联网笔记</h1>
+      <h1 class="hero-title">骑着摩托去远方，<br>回到家有猫在等</h1>
       <div class="hero-divider"></div>
-      <p class="hero-tagline">记录骑车、摄影、养猫，以及利用互联网和AI做的一些小东西。</p>
+      <p class="hero-tagline">也记录用互联网和 AI 折腾出的小东西</p>
       <div class="hero-cta-wrap">
         <a href="<?php echo esc_url( home_url( '/projects/' ) ); ?>" class="hero-cta">看看我折腾过什么 <span>&rarr;</span></a>
       </div>

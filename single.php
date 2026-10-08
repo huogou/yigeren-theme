@@ -18,6 +18,9 @@ while ( have_posts() ) : the_post();
   <?php endif; ?>
   <h1><?php the_title(); ?></h1>
   <div class="article-header__meta">
+    <?php if ( in_category( 'projects' ) ) : $p_status = yigeren_project_status(); ?>
+    <span class="proj-card__status<?php echo $p_status === '已完成' ? ' proj-card__status--done' : ''; ?>"><?php echo esc_html( $p_status ); ?></span>
+    <?php endif; ?>
     <?php echo esc_html( yigeren_full_date() ); ?>
     <?php
     $distance = get_post_meta( get_the_ID(), '_yigeren_distance', true );
