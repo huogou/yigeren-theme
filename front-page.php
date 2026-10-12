@@ -16,9 +16,9 @@ get_header();
       <span class="hero-kanji">記</span>
       <h1 class="hero-title">骑着摩托去远方，<br>回到家有猫在等</h1>
       <div class="hero-divider"></div>
-      <p class="hero-tagline">也记录用互联网和 AI 折腾出的小东西</p>
+      <p class="hero-tagline">记录用互联网和 AI 折腾出的小东西</p>
       <div class="hero-cta-wrap">
-        <a href="<?php echo esc_url( home_url( '/projects/' ) ); ?>" class="hero-cta">看看我折腾过什么 <span>&rarr;</span></a>
+        <a href="<?php echo esc_url( home_url( '/projects/' ) ); ?>" class="hero-cta">看看我做了什么 <span>&rarr;</span></a>
       </div>
     </div>
     <div class="hero-scroll-hint">
@@ -54,8 +54,10 @@ get_header();
         $cat = get_category_by_slug( $slug );
       ?>
       <a href="<?php echo esc_url( $cat ? get_category_link( $cat ) : home_url( '/' . $slug . '/' ) ); ?>" class="seal">
-        <span class="seal__kanji"><?php echo esc_html( $info[0] ); ?></span>
-        <span class="seal__name"><?php echo esc_html( $info[1] ); ?></span>
+        <span class="seal__head">
+          <span class="seal__kanji"><?php echo esc_html( $info[0] ); ?></span>
+          <span class="seal__name"><?php echo esc_html( $info[1] ); ?></span>
+        </span>
         <span class="seal__en"><?php echo esc_html( $info[2] ); ?></span>
         <span class="seal__arrow">&rarr;</span>
         <span class="seal__desc"><?php echo esc_html( $info[3] ); ?></span>

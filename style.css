@@ -827,8 +827,8 @@ p { max-width: 65ch; }
 .hero-bg img{width:100%;height:100%;object-fit:cover;object-position:center 40%;filter:brightness(0.5) contrast(1.08) saturate(1.1)}
 .hero-overlay{position:absolute;inset:0;background:linear-gradient(180deg,rgba(26,22,20,0.15) 0%,rgba(26,22,20,0.1) 30%,rgba(26,22,20,0.35) 60%,rgba(26,22,20,0.85) 100%)}
 .hero-content{position:relative;z-index:1;text-align:center;padding:140px 24px 100px;max-width:640px;margin:0 auto}
-.hero-kanji{font-family:var(--font-display);font-size:clamp(160px,25vw,360px);font-weight:600;line-height:1;color:var(--seed-fg);opacity:0.04;position:absolute;top:50%;left:50%;transform:translate(-50%,-55%);pointer-events:none;user-select:none;text-shadow:0 0 80px rgba(212,87,42,0.08);filter:blur(0.5px)}
-.hero-title{font-family:var(--font-display);font-size:clamp(2.8rem,6.5vw,4.8rem);font-weight:500;line-height:1.2;letter-spacing:-0.02em;color:#fff;margin-bottom:20px;text-shadow:0 2px 30px rgba(0,0,0,0.5),0 0 80px rgba(212,87,42,0.15)}
+.hero-kanji{font-family:var(--font-display);font-size:clamp(160px,25vw,360px);font-weight:600;line-height:1;color:var(--seed-fg);opacity:0.022;position:absolute;top:50%;left:50%;transform:translate(-50%,-55%);pointer-events:none;user-select:none;text-shadow:0 0 80px rgba(212,87,42,0.08);filter:blur(0.5px)}
+.hero-title{font-family:var(--font-display);font-size:clamp(2.4rem,5.6vw,4.15rem);font-weight:500;line-height:1.25;letter-spacing:-0.01em;color:#fff;margin:0 auto 20px;max-width:14em;word-break:keep-all;overflow-wrap:normal;text-shadow:0 2px 30px rgba(0,0,0,0.5),0 0 80px rgba(212,87,42,0.15)}
 .hero-divider{width:48px;height:1px;background:linear-gradient(90deg,transparent,var(--seed-accent),transparent);margin:20px auto 24px;opacity:0.6}
 .hero-tagline{font-family:var(--font-body);font-size:clamp(1rem,2vw,1.2rem);color:rgba(255,255,255,0.88);line-height:1.7;margin-bottom:10px;max-width:500px;margin-left:auto;margin-right:auto;text-shadow:0 1px 12px rgba(0,0,0,0.4);letter-spacing:0.02em}
 .hero-desc{font-family:var(--font-body);font-size:0.92rem;color:rgba(255,255,255,0.55);line-height:1.9;margin-bottom:44px;max-width:480px;margin-left:auto;margin-right:auto;text-shadow:0 1px 8px rgba(0,0,0,0.3)}
@@ -1074,10 +1074,17 @@ p { max-width: 65ch; }
   border-color: color-mix(in srgb, var(--seed-accent) 45%, var(--seed-border));
   background: color-mix(in srgb, var(--seed-accent) 4%, var(--seed-surface));
 }
+/* Keeps the kanji locked to the front of its name with identical spacing in
+   every card, and prevents the pair from being split by flex wrapping. */
+.seal__head {
+  display: inline-flex; align-items: baseline; gap: 10px;
+  flex: 0 0 auto; white-space: nowrap;
+}
 .seal__kanji {
   font-family: var(--font-display);
   font-size: 1.35rem; line-height: 1;
   color: var(--seed-accent);
+  flex: 0 0 1.5rem; width: 1.5rem; text-align: center;
   transition: transform 0.25s ease;
 }
 .seal:hover .seal__kanji { transform: translateX(-2px); }
