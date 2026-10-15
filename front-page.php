@@ -17,6 +17,7 @@ get_header();
       <h1 class="hero-title">骑着摩托去远方，<br>回到家有猫在等</h1>
       <div class="hero-divider"></div>
       <p class="hero-tagline">记录用互联网和 AI 折腾出的小东西</p>
+      <p class="hero-desc">互联网从业十几年 · 深夜写字的人</p>
       <div class="hero-cta-wrap">
         <a href="<?php echo esc_url( home_url( '/projects/' ) ); ?>" class="hero-cta">看看我做了什么 <span>&rarr;</span></a>
       </div>
@@ -77,10 +78,19 @@ get_header();
       </div>
     </div>
     <?php
-    $recent = new WP_Query( array( 'posts_per_page' => 5, 'post_status' => 'publish' ) );
+    // "最近的生活" only tells the life story (生活/摩托/猫咪/摄影/笔记) —
+    // project posts are shown in "我在折腾什么", so they are excluded here.
+    $recent_ids = array();
+    $recent_args = array( 'posts_per_page' => 5, 'post_status' => 'publish' );
+    $projects_term = get_category_by_slug( 'projects' );
+    if ( $projects_term ) {
+        $recent_args['category__not_in'] = array( (int) $projects_term->term_id );
+    }
+    $recent = new WP_Query( $recent_args );
     if ( $recent->have_posts() ) :
       $current_month = '';
       while ( $recent->have_posts() ) : $recent->the_post();
+        $recent_ids[] = get_the_ID();
         $post_month = date_i18n( 'Y年n月', get_post_timestamp() );
         if ( $post_month !== $current_month ) :
           $current_month = $post_month;
@@ -117,7 +127,7 @@ get_header();
     </div>
     <div class="duo reveal reveal-delay-1">
       <?php
-      $moto_query = yigeren_category_query( 'moto', 1 );
+      $moto_query = yigeren_category_query( 'moto', 1, $recent_ids );
       if ( $moto_query->have_posts() ) :
         $moto_query->the_post();
       ?>
@@ -138,7 +148,7 @@ get_header();
       </div>
       <?php endif; ?>
       <?php
-      $cat_query = yigeren_category_query( 'cat', 1 );
+      $cat_query = yigeren_category_query( 'cat', 1, $recent_ids );
       if ( $cat_query->have_posts() ) :
         $cat_query->the_post();
       ?>
@@ -178,9 +188,28 @@ $projects = yigeren_projects_sorted( 5 );
       <a href="<?php echo esc_url( get_category_link( $projects_cat ) ); ?>" class="section__more">全部折腾 &rarr;</a>
       <?php endif; ?>
     </div>
-    <?php if ( ! empty( $projects ) ) : ?>
+    <?php
+    // Split by status, mirroring the projects category page grouping.
+    $ongoing_projects = array();
+    $done_projects    = array();
+    foreach ( $projects as $project ) {
+      if ( yigeren_project_status( $project ) === '已完成' ) {
+        $done_projects[] = $project;
+      } else {
+        $ongoing_projects[] = $project;
+      }
+    }
+    $project_groups = array(
+      array( 'label' => '— 进行中 —', 'posts' => $ongoing_projects ),
+      array( 'label' => '— 已完成 —', 'posts' => $done_projects ),
+    );
+    ?>
+    <?php foreach ( $project_groups as $group ) :
+      if ( empty( $group['posts'] ) ) { continue; }
+    ?>
+    <div class="proj-group reveal"><?php echo esc_html( $group['label'] ); ?></div>
     <div class="proj-list reveal reveal-delay-1">
-      <?php foreach ( $projects as $project ) :
+      <?php foreach ( $group['posts'] as $project ) :
         $status = yigeren_project_status( $project );
         $excerpt = get_the_excerpt( $project );
       ?>
@@ -195,19 +224,20 @@ $projects = yigeren_projects_sorted( 5 );
       </a>
       <?php endforeach; ?>
     </div>
-    <?php else : ?>
+    <?php endforeach; ?>
+    <?php if ( empty( $ongoing_projects ) && empty( $done_projects ) ) : ?>
     <div class="proj-empty reveal reveal-delay-1">第一个项目还在路上。</div>
     <?php endif; ?>
   </div>
 </section>
 
-<!-- Latest Articles -->
+<!-- Recent Updates (site-wide, unfiltered) -->
 <section class="section" data-component="articles">
   <div class="container--wide">
     <div class="section__header reveal">
       <div>
         <span class="section__label">Latest</span>
-        <h2 style="margin-top:8px;">最新文章</h2>
+        <h2 style="margin-top:8px;">最近更新</h2>
       </div>
       <?php $archive_page = get_page_by_path( 'archive' ); if ( $archive_page ) : ?>
       <a href="<?php echo esc_url( get_permalink( $archive_page ) ); ?>" class="section__more">全部归档 &rarr;</a>
@@ -215,7 +245,7 @@ $projects = yigeren_projects_sorted( 5 );
     </div>
     <ul class="article-list reveal reveal-delay-1">
       <?php
-      $latest = new WP_Query( array( 'posts_per_page' => 8, 'post_status' => 'publish' ) );
+      $latest = new WP_Query( array( 'posts_per_page' => 6, 'post_status' => 'publish' ) );
       if ( $latest->have_posts() ) :
         while ( $latest->have_posts() ) : $latest->the_post();
           $cats = get_the_category();

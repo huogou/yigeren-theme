@@ -195,16 +195,24 @@ function yigeren_post_mood( $post = null ) {
 }
 
 /**
- * Custom query for category pages
+ * Custom query for category pages.
+ *
+ * @param string $cat_slug        Category slug.
+ * @param int    $posts_per_page  How many posts to fetch.
+ * @param array  $exclude_ids     Optional post IDs to exclude (de-duplication).
  */
-function yigeren_category_query( $cat_slug, $posts_per_page = 20 ) {
-    return new WP_Query( array(
+function yigeren_category_query( $cat_slug, $posts_per_page = 20, $exclude_ids = array() ) {
+    $args = array(
         'category_name'  => $cat_slug,
         'posts_per_page' => $posts_per_page,
         'post_status'    => 'publish',
         'orderby'        => 'date',
         'order'          => 'DESC',
-    ) );
+    );
+    if ( ! empty( $exclude_ids ) ) {
+        $args['post__not_in'] = array_values( array_unique( array_map( 'absint', (array) $exclude_ids ) ) );
+    }
+    return new WP_Query( $args );
 }
 
 /**

@@ -17,19 +17,39 @@
       document.getElementById('progressBar').style.width = scrolled + '%';
     }, { passive: true });
 
-    // Scroll-driven reveal animations
+    // Scroll-driven reveal animations.
+    // Fallback: if IntersectionObserver is unavailable or throws, every
+    // .reveal element is shown immediately so content is never trapped.
     (function() {
-      var observer = new IntersectionObserver(function(entries) {
-        entries.forEach(function(entry) {
-          if (entry.isIntersecting) {
-            entry.target.classList.add('visible');
-          }
-        });
-      }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+      var nodes = document.querySelectorAll('.reveal');
+      if (!nodes.length) { return; }
 
-      document.querySelectorAll('.reveal').forEach(function(el) {
-        observer.observe(el);
-      });
+      var revealAll = function() {
+        for (var i = 0; i < nodes.length; i++) {
+          nodes[i].classList.add('visible');
+        }
+      };
+
+      if (typeof IntersectionObserver !== 'function') {
+        revealAll();
+        return;
+      }
+
+      try {
+        var observer = new IntersectionObserver(function(entries) {
+          entries.forEach(function(entry) {
+            if (entry.isIntersecting) {
+              entry.target.classList.add('visible');
+            }
+          });
+        }, { threshold: 0.12, rootMargin: '0px 0px -40px 0px' });
+
+        for (var i = 0; i < nodes.length; i++) {
+          observer.observe(nodes[i]);
+        }
+      } catch (e) {
+        revealAll();
+      }
     })();
   </script>
 
